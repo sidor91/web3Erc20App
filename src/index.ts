@@ -1,24 +1,27 @@
-import express, { Request, Response, NextFunction } from "express";
-import bodyParser from "body-parser";
+import express from "express";
 import dotenv from "dotenv";
+dotenv.config();
 import morgan from "morgan";
 import cors from "cors";
-
-dotenv.config();
+import routes from './web3/web3Routes'
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(morgan("combined"));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+	cors(),
+	express.json(),
+	morgan("combined"),
+	// (_, res) => {
+	// 	res.status(404).json({ message: "Not found" });
+	// }
+);
 
-app.use((req: Request, res: Response, next: NextFunction) => {
-	console.log("Request body:", req.body);
-	next();
-});
+app.use(routes)
+
 
 app.listen(port, () => {
 	console.log(`Server is running at http://localhost:${port}`);
 });
+
+export default app;
