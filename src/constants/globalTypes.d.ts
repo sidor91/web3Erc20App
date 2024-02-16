@@ -15,8 +15,3 @@ export interface TransferArgs {
 	token_addr: string;
 	privateKey: string;
 }
-
-export interface BalanceArgs {
-	user_addr: string;
-	token_addr: string;
-}

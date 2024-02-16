@@ -1,13 +1,18 @@
-import Web3 from "web3";
+import Web3, { Contract } from "web3";
 import { HttpError } from "../helpers/httpError";
 import ERC20ABI from "../constants/erc20ABI.json";
-import { TransferArgs, BalanceArgs } from "../constants/globalTypes";
+import { TransferArgs } from "../constants/globalTypes";
 
-export class Erc20Web3Service {
+const INFURA_API_KEY = process.env.INFURA_API_KEY;
+const providerUrl = `https://sepolia.infura.io/v3/${INFURA_API_KEY}`;
+
+export class Web3Service {
 	private web3: Web3;
+	private contract: Contract<typeof ERC20ABI>;
 
-	constructor(providerUrl: string) {
+	constructor(token_addr: string) {
 		this.web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
+		this.contract = new this.web3.eth.Contract(ERC20ABI, token_addr);
 	}
 
 	amountToWei(amount: number) {
@@ -18,12 +23,17 @@ export class Erc20Web3Service {
 		return this.web3.utils.fromWei(amount.toString(), "ether");
 	}
 
-	async getBalance(data: BalanceArgs): Promise<any> {
+	getWallet(privateKey: string) {
+		return this.web3.eth.accounts.wallet.add(`0x${privateKey}`)[0].address;
+  }
+  
+  isEnoughBalance(balance: string, amount: number, gasEstimation: BigInt) {
+    return Number(balance) > amount + Number(this.amountFromWei(gasEstimation))
+  }
+
+	async getBalance(user_addr: string): Promise<any> {
 		try {
-			const { user_addr, token_addr } = data;
-			const contract = new this.web3.eth.Contract(ERC20ABI, token_addr);
-			const balance: BigInt = await contract.methods.balanceOf(user_addr).call();
-      
+			const balance: BigInt = await this.contract.methods.balanceOf(user_addr).call();
 			return this.amountFromWei(balance);
 		} catch (error: any) {
 			console.error("Error sending transaction:", error);
@@ -33,30 +43,24 @@ export class Erc20Web3Service {
 
 	async sendTransaction(data: TransferArgs) {
 		const { user_addr, recipient_addr, amount, token_addr, privateKey } = data;
-		const contract = new this.web3.eth.Contract(ERC20ABI, token_addr);
-		const wallet = this.web3.eth.accounts.wallet.add(`0x${privateKey}`);
+		const wallet = this.getWallet(privateKey);
 
 		try {
-			// const allowance = await contract.methods.allowance(user_addr, recipient_addr).call();
-      // console.log(`Allowance: ${allowance}`);
-      const balance = await this.getBalance({ user_addr, token_addr });
-      const gasPrice = await this.web3.eth.getGasPrice();
-      const gasLimit = '50000';
-
-      const totalPrice = amount + Number(this.amountFromWei(gasPrice));
-
-      if (Number(balance) < totalPrice) {
-        throw HttpError(400, 'Not enough balance for sending transaction');
+      const balance = await this.getBalance(user_addr);
+      const transferMethod = this.contract.methods.transfer(recipient_addr, this.amountToWei(amount));
+			const gasEstimation = await transferMethod.estimateGas({ from: wallet });
+     
+      if (!this.isEnoughBalance(balance, amount, gasEstimation)) {
+				throw HttpError(400, "The balance is not enough to send transaction");
 			}
-      
-			const {blockHash, blockNumber, gasUsed, transactionHash, events } = await contract.methods.transfer(recipient_addr, this.amountToWei(amount)).send({
-				from: wallet[0].address,
-				gasPrice: gasPrice.toString(),
-				gas: gasLimit,
-      });
-      
-      const data = {
-        token: token_addr,
+
+			const { blockHash, blockNumber, gasUsed, transactionHash } = await transferMethod.send({
+				from: wallet,
+				gas: gasEstimation.toString(),
+			});
+
+			const data = {
+				token: token_addr,
 				blockHash,
 				blockNumber: Number(blockNumber),
 				gasUsed: this.amountFromWei(gasUsed),
@@ -65,7 +69,7 @@ export class Erc20Web3Service {
 				to: recipient_addr,
 				amount,
 			};
-      return data;
+			return data;
 		} catch (error: any) {
 			console.error("Error sending transaction:", error.message);
 			throw HttpError(500, error.message);
