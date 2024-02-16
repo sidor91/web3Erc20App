@@ -1,5 +1,10 @@
-import { users } from "../constants/users";
+import { isValidPrivate } from "ethereumjs-util";
 
 export function validatePrivateKey(privateKey: string) {
-  return Object.values(users).includes(privateKey);
+  try {
+		const isValid = isValidPrivate(Buffer.from(privateKey, "hex"));
+		return isValid;
+	} catch (error) {
+		return false;
+	}
 }
