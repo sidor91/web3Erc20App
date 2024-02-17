@@ -9,10 +9,8 @@ declare global {
 }
 
 export interface TransferArgs {
-	user_addr: string;
 	recipient_addr: string;
 	amount: number;
-	token_addr: string;
 	privateKey: string;
 }
 

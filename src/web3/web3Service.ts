@@ -1,5 +1,4 @@
 import Web3, { Contract } from "web3";
-import { HttpError } from "../helpers/httpError";
 import ERC20ABI from "../constants/erc20ABI.json";
 import { TransferArgs } from "../constants/globalTypes";
 import { transactionErrorHandler } from "../helpers/transactionErrorHandler";
@@ -8,70 +7,72 @@ const INFURA_API_KEY = process.env.INFURA_API_KEY;
 const providerUrl = `https://sepolia.infura.io/v3/${INFURA_API_KEY}`;
 
 export class Web3Service {
-  private web3: Web3;
-  private contract: Contract<typeof ERC20ABI>;
+	private token: string;
+	private web3: Web3;
+	private contract: Contract<typeof ERC20ABI>;
 
-  constructor(token_addr: string) {
-    this.web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
-    this.contract = new this.web3.eth.Contract(ERC20ABI, token_addr);
-  }
+	constructor(token_addr: string) {
+		this.token = token_addr;
+		this.web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
+		this.contract = new this.web3.eth.Contract(ERC20ABI, token_addr);
+	}
 
-  amountToWei(amount: number) {
-    return this.web3.utils.toWei(amount.toString(), "ether");
-  }
+	amountToWei(amount: number) {
+		return this.web3.utils.toWei(amount.toString(), "ether");
+	}
 
-  amountFromWei(amount: bigint) {
-    return this.web3.utils.fromWei(amount.toString(), "ether");
-  }
+	amountFromWei(amount: bigint) {
+		return this.web3.utils.fromWei(amount.toString(), "ether");
+	}
 
-  getWallet(privateKey: string) {
-    return this.web3.eth.accounts.wallet.add(`0x${privateKey}`)[0].address;
-  }
-  
-  isEnoughBalance(balance: string, amount: number, gasEstimation: bigint) {
-    return Number(balance) > amount + Number(this.amountFromWei(gasEstimation))
-  }
+	getWallet(privateKey: string) {
+		return this.web3.eth.accounts.wallet.add(`0x${privateKey}`)[0].address;
+	}
 
-  async getBalance(user_addr: string): Promise<string | undefined> {
-    try {
-      const balance: bigint = await this.contract.methods.balanceOf(user_addr).call();
-      return this.amountFromWei(balance);
-    } catch (error: unknown) {
-      transactionErrorHandler(error, 'getBalance');
-    }
-  }
+	isEnoughBalance(balance: string, amount: number, gasEstimation: bigint) {
+		return Number(balance) > amount + Number(this.amountFromWei(gasEstimation));
+	}
 
-  async sendTransaction(data: TransferArgs) {
-    const { user_addr, recipient_addr, amount, token_addr, privateKey } = data;
-    const wallet = this.getWallet(privateKey);
+	async getBalance(user_addr: string): Promise<number | undefined> {
+		try {
+			const balance: bigint = await this.contract.methods.balanceOf(user_addr).call();
+			return Number(this.amountFromWei(balance));
+		} catch (error: unknown) {
+			transactionErrorHandler(error, "getBalance");
+		}
+	}
 
-    try {
-      const balance = await this.getBalance(user_addr);
-      const transferMethod = this.contract.methods.transfer(recipient_addr, this.amountToWei(amount));
-      const gasEstimation = await transferMethod.estimateGas({ from: wallet });
-     
-      if (balance && !this.isEnoughBalance(balance, amount, gasEstimation)) {
-        throw HttpError(400, "The balance is not enough to send transaction");
-      }
+	transferMethod(address: string, amount: number) {
+		return this.contract.methods.transfer(address, this.amountToWei(amount));
+	}
 
-      const { blockHash, blockNumber, gasUsed, transactionHash } = await transferMethod.send({
-        from: wallet,
-        gas: gasEstimation.toString(),
-      });
+	async sendTransaction(data: TransferArgs) {
+		const { recipient_addr, amount, privateKey } = data;
+		const wallet = this.getWallet(privateKey);
+		const transferMethod = this.transferMethod(recipient_addr, amount);
 
-      const data = {
-        token: token_addr,
-        blockHash,
-        blockNumber: Number(blockNumber),
-        gasUsed: this.amountFromWei(gasUsed),
-        transactionHash,
-        from: user_addr,
-        to: recipient_addr,
-        amount,
-      };
-      return data;
-    } catch (error: unknown) {
-      transactionErrorHandler(error, "sendTransaction");
-    }
-  }
+		try {
+			const gasEstimation = await transferMethod.estimateGas({ from: wallet });
+
+			const { blockHash, blockNumber, gasUsed, transactionHash } = await transferMethod.send({
+				from: wallet,
+				gas: gasEstimation.toString(),
+			});
+
+			const data = {
+				token: this.token,
+				blockHash,
+				blockNumber: Number(blockNumber),
+				gasUsed: this.amountFromWei(gasUsed),
+				transactionHash,
+				from: wallet,
+				to: recipient_addr,
+				amount,
+			};
+
+			return data;
+		} catch (error: unknown) {
+			transactionErrorHandler(error, "sendTransaction");
+		}
+	}
 }
