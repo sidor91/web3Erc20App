@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { Request, Response, NextFunction } from "express";
 
 declare global {
 	namespace Express {
@@ -15,3 +15,5 @@ export interface TransferArgs {
 	token_addr: string;
 	privateKey: string;
 }
+
+export type Controller = (req: Request, res: Response, next: NextFunction) => Promise<void>;
