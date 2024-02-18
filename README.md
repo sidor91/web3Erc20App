@@ -20,7 +20,9 @@ npm start
 npm run dev (nodemon)
 ```
 
-## Get User's balance
+## API Reference
+
+#### Get User's balance
 
 ```http
   GET /balance/:token_addr/:user_addr
@@ -32,7 +34,7 @@ npm run dev (nodemon)
 | `user_addr` | `string` | **Required**. User's address |
 
 
-## Transfer token 
+#### Transfer token 
 
 ```http
   POST /transfer
