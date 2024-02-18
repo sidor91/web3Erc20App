@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/sidor91/web3Erc20App/readme-md-generator.git"
+		"url": "git+https://github.com/sidor91/web3Erc20App/blob/main/README.md.git"
 	},
 	"scripts": {
 		"test": "jest",
