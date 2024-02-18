@@ -29,8 +29,16 @@ export class Web3Erc20Service {
 		return this.web3.eth.accounts.wallet.add(`0x${privateKey}`)[0].address;
 	}
 
-	isEnoughBalance(balance: string, amount: number, gasEstimation: bigint) {
-		return Number(balance) > amount + Number(this.amountFromWei(gasEstimation));
+	private transferMethod(recipient_addr: string, amount: number) {
+		return this.contract.methods.transfer(recipient_addr, this.amountToWei(amount));
+	}
+
+	async estimateGas(from: string, recipient: string, amount: number) {
+		try {
+			return await this.transferMethod(recipient, amount).estimateGas({ from });
+		} catch (error: unknown) {
+			transactionErrorHandler(error, "estimateGas");
+		}
 	}
 
 	async getBalance(user_addr: string): Promise<{ balance: number } | undefined> {
@@ -42,21 +50,19 @@ export class Web3Erc20Service {
 		}
 	}
 
-	transferMethod(address: string, amount: number) {
-		return this.contract.methods.transfer(address, this.amountToWei(amount));
-	}
-
 	async sendTransaction(data: TransferArgs) {
 		const { recipient_addr, amount, privateKey } = data;
-		const wallet = this.getWallet(privateKey);
-		const transferMethod = this.transferMethod(recipient_addr, amount);
 
 		try {
-			const gasEstimation = await transferMethod.estimateGas({ from: wallet });
+			const wallet = this.getWallet(privateKey);
+			const gasEstimation = await this.estimateGas(wallet, recipient_addr, amount);
 
-			const { blockHash, blockNumber, gasUsed, transactionHash } = await transferMethod.send({
+			const { blockHash, blockNumber, gasUsed, transactionHash } = await this.transferMethod(
+				recipient_addr,
+				amount
+			).send({
 				from: wallet,
-				gas: gasEstimation.toString(),
+				gas: gasEstimation?.toString(),
 			});
 
 			const data = {

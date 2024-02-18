@@ -1,22 +1,26 @@
 import { Request, Response } from "express";
-import { Web3Erc20Service } from "./Service";
+import { isValidEtherumAddress } from "../../helpers/isValidEtherumAddress";
 
 export const sendTransactionController = async (req: Request, res: Response) => {
-	const { token_addr, recipient_addr, amount } = req.body;
-	const { privateKey } = req;
-	const web3Service = new Web3Erc20Service(token_addr);
+	const { recipient_addr, amount } = req.body;
+  const { privateKey, web3Service } = req;
+  isValidEtherumAddress([recipient_addr]);
 
-	if (privateKey) {
+  if (privateKey && web3Service) {
 		const recipe = await web3Service.sendTransaction({ recipient_addr, amount, privateKey });
 
 		res.status(200).json(recipe);
-	}
+  } 
 };
 
 export const getUserBalance = async (req: Request, res: Response) => {
-	const { token_addr, user_addr } = req.params;
-	const web3Service = new Web3Erc20Service(token_addr);
-	const balance = await web3Service.getBalance(user_addr);
+  const { user_addr } = req.params;
+  const { web3Service } = req;
+  isValidEtherumAddress([user_addr]);
 
-	res.status(200).json(balance);
+  if (web3Service) {
+    const balance = await web3Service.getBalance(user_addr);
+
+		res.status(200).json(balance);
+  }
 };
