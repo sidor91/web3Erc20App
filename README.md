@@ -1,7 +1,6 @@
 # Welcome to web3erc20app 👋
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000)
 [![Documentation](https://img.shields.io/badge/documentation-yes-brightgreen.svg)](https://github.com/sidor91/web3Erc20App/blob/main/README.md)
-[![License: ISC](https://img.shields.io/github/license/sidor91/web3erc20app)](#)
 
 > App to check user's ERC20 token balance and make transfers
 
