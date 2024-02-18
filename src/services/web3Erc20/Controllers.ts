@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { isValidEtherumAddress } from "../../helpers/isValidEtherumAddress";
+import { isValidEtherumAddress } from "../../helpers";
 
 export const sendTransactionController = async (req: Request, res: Response) => {
 	const { recipient_addr, amount } = req.body;

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "../helpers/httpError";
+import { HttpError } from "../helpers";
 import { Web3Erc20Service } from "../services/web3Erc20/Service";
 
 export const isValidErc20TokenAddress = (req: Request, res: Response, next: NextFunction) => {

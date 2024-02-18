@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction} from 'express'
 import { transferValidationSchema } from "../schemas/validateTransfer";
-import { HttpError } from '../helpers/httpError';
+import { HttpError } from '../helpers';
 
 export const validateTransfer = (req: Request, res: Response, next: NextFunction) => {
 	const { error } = transferValidationSchema.validate(req.body);

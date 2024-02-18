@@ -1,7 +1,7 @@
 import Web3, { Contract } from "web3";
 import ERC20ABI from "../../constants/erc20ABI.json";
 import { TransferArgs } from "./types";
-import { transactionErrorHandler } from "../../helpers/transactionErrorHandler";
+import { transactionErrorHandler } from "../../helpers";
 
 const { INFURA_API_KEY } = process.env;
 const providerUrl = `https://sepolia.infura.io/v3/${INFURA_API_KEY}`;

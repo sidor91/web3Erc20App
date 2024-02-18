@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { HttpError } from "../helpers/httpError";
-import { validatePrivateKey } from "../helpers/validatePrivateKey";
+import { HttpError, validatePrivateKey } from "../helpers";
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
 	const privateKey = req.headers.authorization?.replace("Bearer ", "");
