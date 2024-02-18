@@ -1,8 +1,12 @@
 {
 	"name": "web3erc20app",
 	"version": "1.0.0",
-	"description": "",
+	"description": "App to check user's ERC20 token balance and make transfers",
 	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/sidor91/web3Erc20App/readme-md-generator.git"
+	},
 	"scripts": {
 		"test": "jest",
 		"start": "node dist/index.js",
@@ -11,7 +15,7 @@
 		"lint": "eslint . --ext .js,.jsx,.ts,.tsx"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "Serhii Sydorenko",
 	"license": "ISC",
 	"devDependencies": {
 		"@jest/globals": "^29.7.0",
@@ -40,6 +44,7 @@
 		"helmet": "^7.1.0",
 		"joi": "^17.12.1",
 		"morgan": "^1.10.0",
+		"readme-md-generator": "^1.0.0",
 		"ts-node": "^10.9.2",
 		"web3": "^4.5.0"
 	}
