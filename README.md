@@ -27,6 +27,9 @@ npm run dev (nodemon)
   Bearer [private_key]
 ```
 
+-----------------------------------------------------------------------------------
+
+
 #### Get User's balance
 
 ```http
