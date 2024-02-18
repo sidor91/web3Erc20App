@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { isValidAddress } from "ethereumjs-util";
 import { HttpError } from "../helpers/httpError";
+import { Web3Erc20Service } from "../services/web3Erc20/Service";
 
 export const isValidErc20TokenAddress = (req: Request, res: Response, next: NextFunction) => {
   const tokenAddressBody = req.body.token_addr;
@@ -8,10 +8,12 @@ export const isValidErc20TokenAddress = (req: Request, res: Response, next: Next
 
   const tokenAddress = tokenAddressBody || tokenAddressParams;
 	try {
-		const isValid = isValidAddress(tokenAddress);
-		if (!isValid) next(HttpError(400, "Token address is not valid ERC20 token address"));
+    const web3Service = new Web3Erc20Service(tokenAddress);
+    req.web3Service = web3Service;
 		next();
 	} catch (error) {
-		return error;
+		throw HttpError(400, `${tokenAddress} is not valid ERC20 address`);
 	}
 };
+
+
