@@ -1,7 +1,7 @@
 import express from "express";
-import { controllerWrapper } from "../decorators/controllerWrapper";
-import { sendTransactionController, getUserBalance } from "./web3Controllers";
-import { authenticate, isValidErc20TokenAddress } from "../middlewares";
+import { controllerWrapper } from "../../decorators/controllerWrapper";
+import { sendTransactionController, getUserBalance } from "./Controllers";
+import { authenticate, isValidErc20TokenAddress } from "../../middlewares";
 
 const router = express.Router();
 

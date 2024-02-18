@@ -1,12 +1,12 @@
 import Web3, { Contract } from "web3";
-import ERC20ABI from "../constants/erc20ABI.json";
-import { TransferArgs } from "../constants/globalTypes";
-import { transactionErrorHandler } from "../helpers/transactionErrorHandler";
+import ERC20ABI from "../../constants/erc20ABI.json";
+import { TransferArgs } from "./types";
+import { transactionErrorHandler } from "../../helpers/transactionErrorHandler";
 
-const INFURA_API_KEY = process.env.INFURA_API_KEY;
+const { INFURA_API_KEY } = process.env;
 const providerUrl = `https://sepolia.infura.io/v3/${INFURA_API_KEY}`;
 
-export class Web3Service {
+export class Web3Erc20Service {
 	private token: string;
 	private web3: Web3;
 	private contract: Contract<typeof ERC20ABI>;
@@ -33,10 +33,10 @@ export class Web3Service {
 		return Number(balance) > amount + Number(this.amountFromWei(gasEstimation));
 	}
 
-	async getBalance(user_addr: string): Promise<number | undefined> {
+	async getBalance(user_addr: string): Promise<{ balance: number } | undefined> {
 		try {
 			const balance: bigint = await this.contract.methods.balanceOf(user_addr).call();
-			return Number(this.amountFromWei(balance));
+			return { balance: Number(this.amountFromWei(balance)) };
 		} catch (error: unknown) {
 			transactionErrorHandler(error, "getBalance");
 		}
