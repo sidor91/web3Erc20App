@@ -20,6 +20,31 @@ npm start
 npm run dev (nodemon)
 ```
 
+## Get User's balance
+
+```http
+  GET /balance/:token_addr/:user_addr
+```
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `token_addr` | `string` | **Required**. An address of token to check balance of |
+| `user_addr` | `string` | **Required**. User's address |
+
+
+## Transfer token 
+
+```http
+  POST /transfer
+```
+
+| Body | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `token_addr`      | `string` | **Required**. An address of token to transfer |
+| `recipient_addr`      | `string` | **Required**. Recipient address |
+| `amount`      | `number` | **Required**. Amount of tokens to transfer |
+
+
 ## Run tests
 
 ```sh
