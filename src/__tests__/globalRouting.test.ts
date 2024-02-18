@@ -1,4 +1,4 @@
-const request = require("supertest");
+import { agent as request } from "supertest";
 import app from "../app";
 
 describe("Test the root path", () => {
