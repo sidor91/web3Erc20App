@@ -13,7 +13,7 @@ npm install
 ## Usage
 
 ```sh
-npm start
+npm run build -> npm start
 ```
 ```sh
 npm run dev (nodemon)
