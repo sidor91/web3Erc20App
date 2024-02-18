@@ -24,7 +24,11 @@ npm run dev (nodemon)
 #### Authorization
 
 ```
-  Bearer [private_key]
+{
+  "headers": {
+    "Authorization": "Bearer {{user's private key}}"
+  }
+}
 ```
 
 -----------------------------------------------------------------------------------
