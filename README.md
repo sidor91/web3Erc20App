@@ -23,7 +23,7 @@ npm run dev (nodemon)
 
 #### Authorization
 
-```http
+```
   Bearer [private_key]
 ```
 
